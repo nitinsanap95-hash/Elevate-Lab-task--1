@@ -1,114 +1,142 @@
-📌 Project Steps & Documentation
-✅ 1. Install Nmap
-Download and install Nmap from the official site:
-👉 https://nmap.org/download.html
+# 🛰️ Task 1: Scan Your Local Network for Open Ports (Cybersecurity Internship)
 
-Verify installation by running:
+## 🎯 Objective
+Understand and apply basic **network reconnaissance** skills using **Nmap** to discover open ports on devices in your local network and analyze their potential risks.
 
-bash
-Copy
-Edit
-nmap -v
-✅ 2. Find Your Local IP Range
-Use the following command to identify your system’s local IP address:
+---
 
-Windows:
-ipconfig
+## 🛠️ Tools Required
+- **Nmap** (Install via Kali: `sudo apt install nmap`)
+- **Wireshark** (Optional: Packet analysis)
+- **Kali Linux Terminal**
 
-Linux/macOS:
-ifconfig or ip a
+---
 
-Example output:
+## ✅ Step-by-Step Instructions
 
-nginx
-Copy
-Edit
-IPv4 Address: 192.168.1.105
-Subnet Mask: 255.255.255.0
-Based on this, the IP range is: 192.168.1.0/24
+### 🔹 Step 1: Install Nmap
+```bash
+sudo apt update
+sudo apt install nmap
+```
+Or download from: https://nmap.org/download.html
 
-✅ 3. Run a TCP SYN Scan with Nmap
-Run the following command to perform a TCP SYN scan:
+### 🔹 Step 2: Find Your IP Range
+Run:
+```bash
+ip a
+```
+Look for your local IP (e.g., `192.168.1.7`) → calculate subnet range (e.g., `192.168.1.0/24`).
 
-bash
-Copy
-Edit
-nmap -sS 192.168.1.0/24 -oN scan_output.txt -oX scan_output.xml
-Explanation:
+### 🔹 Step 3: Run a TCP SYN Scan
+```bash
+nmap -sS 192.168.1.0/24 -oN scan_results.txt
+```
+- `-sS`: TCP SYN scan (stealthy)
+- `-oN`: Save output in normal format
 
--sS: Stealth (SYN) scan.
+📸 Save screenshot: `screenshots/nmap_scan.png`
 
-192.168.1.0/24: Full local subnet.
+### 🔹 Step 4: Analyze the Output
+Example result:
+```
+Nmap scan report for 192.168.1.10
+Host is up.
+PORT     STATE SERVICE
+22/tcp   open  ssh
+80/tcp   open  http
+443/tcp  open  https
+```
 
--oN: Output in text format.
+🔍 Interpretation:
+- Port 22 → SSH → If open on a user machine, may allow brute-force.
+- Port 80/443 → Web server running → Is it needed on this device?
 
--oX: Output in XML format (useful for further analysis).
+---
 
-✅ 4. Note Down IPs & Open Ports
-Sample Nmap output:
+## 🧪 Step 5 (Optional): Analyze Traffic with Wireshark
+1. Open Wireshark.
+2. Start capture on active interface.
+3. Filter by:
+```plaintext
+ip.addr == 192.168.1.10
+```
+4. Observe SYN, SYN-ACK handshakes.
+📸 Screenshot: `screenshots/wireshark_capture.png`
 
-bash
-Copy
-Edit
-Nmap scan report for 192.168.1.1
-Open ports: 80/tcp, 443/tcp
+---
 
-Nmap scan report for 192.168.1.101
-Open ports: 22/tcp, 139/tcp, 445/tcp
-✅ 5. Analyze Packet Capture with Wireshark (Optional)
-Wireshark Steps:
+## 🚨 Common Services & Risk Table
+| Port | Service | Risk |
+|------|---------|------|
+| 21   | FTP     | Unencrypted login data |
+| 22   | SSH     | Brute-force attacks |
+| 23   | Telnet  | Insecure protocol |
+| 80   | HTTP    | Unencrypted traffic |
+| 443  | HTTPS   | Safer, but misconfigurations possible |
+| 3306 | MySQL   | Database exposure risk |
 
-Start capture on your active network interface.
+---
 
-Run the Nmap scan while capture is active.
+## 🔒 How to Secure Open Ports
+- Close unused ports via firewall: `ufw` or `iptables`
+- Use secure protocols (e.g., SSH instead of Telnet)
+- Update and patch services regularly
+- Use intrusion detection (Snort, Suricata)
 
-Apply this display filter to see SYN-ACK responses (open ports):
+---
 
-wireshark
-Copy
-Edit
-tcp.flags.syn == 1 && tcp.flags.ack == 1
-Save a screenshot or pcap file for documentation.
+## 📚 Key Concepts
+- **Open Port:** A TCP/UDP port accepting connections
+- **TCP SYN Scan:** Sends SYN packet, observes response without completing handshake
+- **Network Reconnaissance:** Identifying devices and services
+- **Firewall:** Blocks unauthorized access to/from network
 
-✅ 6. Research Common Services on Open Ports
-Port	Protocol	Service	Description
-22	TCP	SSH	Secure Shell - remote login
-80	TCP	HTTP	Web server (insecure)
-443	TCP	HTTPS	Secure web server
-139	TCP	NetBIOS	File sharing on Windows
-445	TCP	SMB	Windows file sharing & printers
+---
 
-✅ 7. Identify Security Risks from Open Ports
-Findings from scan:
+## ❓ Interview Questions (with Answers)
 
-192.168.1.1 (Router)
+### 1. What is an open port?
+An open port is a network port that accepts incoming connections. Attackers scan for these to find vulnerabilities.
 
-Open Ports: 80, 443
+### 2. How does Nmap perform a TCP SYN scan?
+It sends a SYN packet to target ports. If SYN-ACK is received, the port is open. It doesn’t complete the handshake, making it stealthy.
 
-🔒 Risk: Web admin page exposed. Ensure strong password, use HTTPS only.
+### 3. What risks are associated with open ports?
+They expose services that might be unpatched or misconfigured, allowing exploitation, malware injection, or lateral movement.
 
-192.168.1.101 (Workstation)
+### 4. Explain the difference between TCP and UDP scanning.
+- **TCP scan:** Connection-oriented, receives acknowledgments.
+- **UDP scan:** Connectionless, relies on ICMP "port unreachable" responses.
 
-Open Ports: 22, 139, 445
+### 5. How can open ports be secured?
+- Use firewalls
+- Close unused ports
+- Use encrypted and authenticated services
 
-🔒 Risks:
+### 6. What is a firewall's role regarding ports?
+It allows or blocks traffic on specific ports, acting as a gatekeeper to reduce attack surface.
 
-SSH (22): Brute-force attacks if default credentials are used.
+### 7. What is a port scan and why do attackers perform it?
+A method to discover open ports/services on a host. Used for reconnaissance before launching attacks.
 
-SMB (445): Vulnerable to known exploits (e.g., EternalBlue).
+### 8. How does Wireshark complement port scanning?
+It visually analyzes packet exchanges. Helps verify traffic, detect anomalies, and validate scan activity (SYN/SYN-ACK packets).
 
-NetBIOS (139): May leak information about shared folders.
+---
 
-✅ 8. Save the Scan Results
-The results were saved in multiple formats:
+## 📂 Recommended GitHub Repository Structure
+```
+network-scan-task/
+├── README.md
+├── scan_results.txt
+├── screenshots/
+│   ├── nmap_scan.png
+│   └── wireshark_capture.png
+```
 
-scan_output.txt: Human-readable text format
 
-scan_output.xml: XML format (for use in automation/reporting)
 
-You can also generate HTML using:
-
-bash
-Copy
-Edit
-xsltproc scan_output.xml -o scan_output.html
+## ✍️ Task Completed By:
+**Nitin sanap **  
+Cybersecurity Intern
